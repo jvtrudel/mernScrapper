@@ -1,0 +1,21 @@
+#! /bin/bash
+
+#
+verb=$1
+output_dir=$2
+
+echo "$output_dir"
+if [ ! -d "$output_dir" ]; then
+	echo "test"
+   mkdir -p $output_dir
+fi
+
+if [ $verb == "routes" ]; then
+  echo "Télécharge les routes du Québec au format shapefile"
+	wget "https://mern.gouv.qc.ca/publications/territoire/portrait/1M/route_l.zip" -O $output_dir/routes_mern.zip
+elif [ $verb == "municipalités" ]; then
+	echo "Télécharge les municipalités du Québec"
+	wget "ftp://ftp.mrnf.gouv.qc.ca/public/dgig/produits/bdga1m/vectoriel/munic_SHP.zip" -O $output_dir/municipalites_mern.zip
+else
+  echo "$verb n'est pas un jeux de donnée connue."
+fi

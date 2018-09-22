@@ -1,0 +1,19 @@
+#! /usr/bin/env bash
+
+
+type_tag=$1
+work_directory=$2
+
+
+
+if [ ! -d $work_directory ]; then
+   echo "Le répertoire $work_directory n'existe pas"
+   exit 1
+fi
+
+
+if [ "$type_tag" == "municipalités" ]; then
+  7z x $work_directory/municipalites_mern.zip -o$work_directory/municipalites_mern
+else
+  echo "Le jeux de donnée $type_tag n'est pas répertorié"
+fi

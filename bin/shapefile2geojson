@@ -1,0 +1,40 @@
+#! /usr/bin/env bash
+#
+# Transforme un fichier shapefile en geojson
+#
+#
+# SYNOPSIS
+#   shapefile2geojson <dataset tag> <work directory> <export_srs> [<output_directory>]
+#
+
+
+dataset=$1
+work_directory=$2
+srs=$3
+
+
+
+
+if [ ! -d $work_directory ]; then
+   echo "Le répertoire $work_directory n'existe pas"
+   exit 1
+fi
+
+
+
+
+if [ "$dataset" == "municipalités" ]; then
+   if [ -d "$work_directory/municipalites_mern" ]; then
+	    out="$work_directory/municipalite_polygon.geo.json"
+	    tmp="$out.wrong-encoding.geojson"
+	 		ogr2ogr -f GeoJSON -t_srs $srs $tmp "$work_directory/municipalites_mern/munic_polygone.shp"
+			# on met l'encodage en utf-8 pour éviter les problèmes
+			file -I $tmp | cut -d"=" -f2 | awk '{ print toupper($0)}' | xargs -I % iconv -f % -t UTF-8 $tmp > $out
+			rm $tmp
+   else
+		 echo "Le repertoire $work_directory/municipalites_mern n'existe pas"
+		 exit 1
+	 fi
+else
+   echo "Le jeux de donnée $dataset n'existe pas"
+fi

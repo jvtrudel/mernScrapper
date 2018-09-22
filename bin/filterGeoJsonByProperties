@@ -1,0 +1,74 @@
+#! /usr/bin/env ruby
+
+require 'json'
+require 'fileutils'
+# Prend un fichier geojson contenant un 'FeatureCollection' et produit un fichier contenant polygone ayant les propriétés corespondantes
+#
+# EXEMPLE:
+#    filterGeoJsonByProperties.rb <target_path> <result_dir> <result_name> <property name> <... property values>
+
+# variables
+
+input_data=ARGV
+
+n_prop=input_data.count
+target=input_data[0]
+output_dir=input_data[1]
+output_name=input_data[2]
+
+target_property=input_data[3]
+
+
+property_values=[]
+(4..(n_prop-1)).to_a.each do |i|
+    property_values.push input_data[i]
+end
+
+# Importation des données
+file=File.read(target);
+puts target
+source=JSON.parse(file);
+
+# On récupère des méta-données pertinentes
+metadata={}
+metadata["crs"]=source["crs"]
+
+data={}
+
+
+# Boucle sur les features
+
+source['features'].each do | feature |
+   # todo: mettre ça dans un try/catch
+
+	 # puts feature
+   # si existe pas, crée un array
+   unless data.key?(feature['properties'][target_property])
+	 		data[feature['properties'][target_property]]=[]
+   end
+	 if property_values.include? feature['properties'][target_property]
+		 puts "feature:"
+		 puts target_property
+		 puts feature['properties'][target_property]
+		 data[feature['properties'][target_property]].push(feature)
+	 end
+end
+
+
+# TODO: à Modifier pour qu'on écrive juste le bon fichier
+# Écrit le tout dans un fichier
+data.each do |key,value|
+   # On s'assure que le repertoire existe
+	 puts output_dir
+	 puts output_name
+	 puts key
+   filename=output_dir+'/'+output_name+'-'+key+'.geo.json'
+   dirname = File.dirname(filename)
+   unless File.directory?(dirname)
+     FileUtils.mkdir_p(dirname)
+   end
+   out_json={"type"=>"FeatureCollection","name"=>key,"crs"=>metadata["crs"],"features"=>value}
+   File.open(filename, 'w') do |f|
+      f.puts out_json.to_json
+   end
+end
